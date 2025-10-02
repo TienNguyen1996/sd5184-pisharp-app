@@ -52,3 +52,4 @@ steps:
       target: 'backend:$(tag)'
       severities: 'HIGH, CRITICAL'
       publish: true
+
