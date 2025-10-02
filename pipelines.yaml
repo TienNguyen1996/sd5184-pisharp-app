@@ -10,12 +10,9 @@ variables:
   tag: '$(Build.BuildId)'
 
 steps:
-  # Clone the public GitHub repo
-  - script: |
-      git clone $(repoUrl)
-    displayName: 'Clone Public GitHub Repo'
-
-  # Build Frontend Docker Image
+  - checkout: self
+    displayName: 'Checkout GitHub Repository'
+    # Build Frontend Docker Image
   - task: Docker@2
     inputs:
       command: build
