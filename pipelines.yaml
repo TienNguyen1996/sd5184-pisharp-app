@@ -16,8 +16,8 @@ steps:
   - task: Docker@2
     inputs:
       command: build
-      dockerfile: $(repoName)/src/frontend/Dockerfile
-      buildContext: $(repoName)/src/frontend
+      dockerfile: Dockerfile
+      buildContext: src/frontend
       tags: |
         frontend:$(tag)
 
@@ -35,8 +35,8 @@ steps:
   - task: Docker@2
     inputs:
       command: build
-      dockerfile: $(repoName)/src/backend/Dockerfile
-      buildContext: $(repoName)/src/backend
+      dockerfile: Dockerfile
+      buildContext: src/backend
       tags: |
         backend:$(tag)
 
