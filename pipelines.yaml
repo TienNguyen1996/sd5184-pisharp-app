@@ -16,7 +16,7 @@ steps:
   - task: Docker@2
     inputs:
       command: build
-      dockerfile: Dockerfile
+      dockerfile: src/frontend/Dockerfile
       buildContext: src/frontend
       tags: |
         frontend:$(tag)
@@ -35,7 +35,7 @@ steps:
   - task: Docker@2
     inputs:
       command: build
-      dockerfile: Dockerfile
+      dockerfile: src/backend/Dockerfile
       buildContext: src/backend
       tags: |
         backend:$(tag)
