@@ -1,0 +1,54 @@
+trigger:
+  - main
+
+pool:
+  name: 'Azure Pipelines'
+
+variables:
+  repoUrl: 'https://github.com/TienNguyen1996/sd5184-pisharp-app'
+  repoName: 'kubernetes'
+  tag: '$(Build.BuildId)'
+
+steps:
+  # Clone the public GitHub repo
+  - script: |
+      git clone $(repoUrl)
+    displayName: 'Clone Public GitHub Repo'
+
+  # Build Frontend Docker Image
+  - task: Docker@2
+    inputs:
+      command: build
+      dockerfile: $(repoName)/src/frontend/Dockerfile
+      buildContext: $(repoName)/src/frontend
+      tags: |
+        frontend:$(tag)
+
+  # Trivy@2 Scan Frontend Image
+  - task: trivy@2
+    continueOnError: true
+    inputs:
+      version: 'latest'
+      type: 'image'
+      target: 'frontend:$(tag)'
+      severities: 'HIGH, CRITICAL'
+      publish: true
+
+  # Build Backend Docker Image
+  - task: Docker@2
+    inputs:
+      command: build
+      dockerfile: $(repoName)/src/backend/Dockerfile
+      buildContext: $(repoName)/src/backend
+      tags: |
+        backend:$(tag)
+
+  # Trivy@2 Scan Backend Image
+  - task: trivy@2
+    continueOnError: true
+    inputs:
+      version: 'latest'
+      type: 'image'
+      target: 'backend:$(tag)'
+      severities: 'HIGH, CRITICAL'
+      publish: true
