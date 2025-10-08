@@ -29,7 +29,7 @@ steps:
     target: 'demosd5184s.azurecr.io/frontend:$(tag)'
     severities: 'HIGH, CRITICAL'
     publish: true
-
+- script: docker image ls -a
 - task: Docker@2
   inputs:
     command: build
