@@ -13,14 +13,15 @@ steps:
 - checkout: self
   displayName: 'Checkout GitHub Repository'
 
+# Build Frontend Image
 - task: Docker@2
   inputs:
     command: build
     dockerfile: src/frontend/Dockerfile
     buildContext: src/frontend
-    tags: |
-      demosd5184s.azurecr.io/frontend:$(tag)
+    arguments: '--tag demosd5184s.azurecr.io/frontend:$(tag) --tag demosd5184s.azurecr.io/frontend:latest'
 
+# Scan Frontend Image
 - task: trivy@2
   continueOnError: true
   inputs:
@@ -29,15 +30,16 @@ steps:
     target: 'demosd5184s.azurecr.io/frontend:$(tag)'
     severities: 'HIGH, CRITICAL'
     publish: true
-- script: docker image ls -a
+
+# Build Backend Image
 - task: Docker@2
   inputs:
     command: build
     dockerfile: src/backend/Dockerfile
     buildContext: src/backend
-    tags: |
-      demosd5184s.azurecr.io/backend:$(tag)
+    arguments: '--tag demosd5184s.azurecr.io/backend:$(tag) --tag demosd5184s.azurecr.io/backend:latest'
 
+# Scan Backend Image
 - task: trivy@2
   continueOnError: true
   inputs:
@@ -47,17 +49,18 @@ steps:
     severities: 'HIGH, CRITICAL'
     publish: true
 
+# Login to ACR
 - script: docker login -u sd5184 -p '$(dockerRegistryPassword)' demosd5184s.azurecr.io
-- task: Docker@2
-  inputs:
-    command: push
-    repository: 'demosd5184s.azurecr.io/frontend'
-    tags: |
-      $(tag)
+  displayName: 'Docker Login to ACR'
 
-- task: Docker@2
-  inputs:
-    command: push
-    repository: 'demosd5184s.azurecr.io/backend'
-    tags: |
-      $(tag)
+# Push Frontend Image
+- script: |
+    docker push demosd5184s.azurecr.io/frontend:$(tag)
+    docker push demosd5184s.azurecr.io/frontend:latest
+  displayName: 'Push Frontend Image'
+
+# Push Backend Image
+- script: |
+    docker push demosd5184s.azurecr.io/backend:$(tag)
+    docker push demosd5184s.azurecr.io/backend:latest
+  displayName: 'Push Backend Image'
