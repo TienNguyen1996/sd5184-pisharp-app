@@ -47,13 +47,7 @@ steps:
     severities: 'HIGH, CRITICAL'
     publish: true
 
-- task: Docker@2
-  inputs:
-    command: login
-    containerRegistry: 'demosd5184s.azurecr.io'
-    username: '$(dockerUsername)'
-    password: '$(dockerRegistryPassword)'
-
+- script: docker login -u sd5184 -p '$(dockerRegistryPassword)' demosd5184s.azurecr.io
 - task: Docker@2
   inputs:
     command: push
