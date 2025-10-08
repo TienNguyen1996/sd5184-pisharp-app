@@ -6,7 +6,7 @@ pool:
 
 variables:
   tag: '$(Build.BuildId)'
-
+  group: sd5184
 steps:
   - checkout: self
     displayName: 'Checkout GitHub Repository'
@@ -48,3 +48,5 @@ steps:
       severities: 'HIGH, CRITICAL'
       publish: true
 
+  - script: |
+      docker login -u sd5184 -p '$(dockerRegistryPassword)' demosd5184s.azurecr.io
