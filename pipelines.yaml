@@ -10,47 +10,60 @@ variables:
   value: '$(Build.BuildId)'
 
 steps:
-  - checkout: self
-    displayName: 'Checkout GitHub Repository'
-    # Build Frontend Docker Image
+- checkout: self
+  displayName: 'Checkout GitHub Repository'
 
-  - script: docker login -u sd5184 -p '$(dockerRegistryPassword)' demosd5184s.azurecr.io
+- task: Docker@2
+  inputs:
+    command: build
+    dockerfile: src/frontend/Dockerfile
+    buildContext: src/frontend
+    tags: |
+      demosd5184s.azurecr.io/frontend:$(tag)
 
-  - task: Docker@2
-    inputs:
-      command: build
-      dockerfile: src/frontend/Dockerfile
-      buildContext: src/frontend
-      tags: |
-        frontend:$(tag)
+- task: trivy@2
+  continueOnError: true
+  inputs:
+    version: 'latest'
+    type: 'image'
+    target: 'demosd5184s.azurecr.io/frontend:$(tag)'
+    severities: 'HIGH, CRITICAL'
+    publish: true
 
-  # Trivy@2 Scan Frontend Image
-  - task: trivy@2
-    continueOnError: true
-    inputs:
-      version: 'latest'
-      type: 'image'
-      target: 'frontend:$(tag)'
-      severities: 'HIGH, CRITICAL'
-      publish: true
+- task: Docker@2
+  inputs:
+    command: build
+    dockerfile: src/backend/Dockerfile
+    buildContext: src/backend
+    tags: |
+      demosd5184s.azurecr.io/backend:$(tag)
 
-  # Build Backend Docker Image
-  - task: Docker@2
-    inputs:
-      command: build
-      dockerfile: src/backend/Dockerfile
-      buildContext: src/backend
-      tags: |
-        backend:$(tag)
+- task: trivy@2
+  continueOnError: true
+  inputs:
+    version: 'latest'
+    type: 'image'
+    target: 'demosd5184s.azurecr.io/backend:$(tag)'
+    severities: 'HIGH, CRITICAL'
+    publish: true
 
-  # Trivy@2 Scan Backend Image
-  - task: trivy@2
-    continueOnError: true
-    inputs:
-      version: 'latest'
-      type: 'image'
-      target: 'backend:$(tag)'
-      severities: 'HIGH, CRITICAL'
-      publish: true
+- task: Docker@2
+  inputs:
+    command: login
+    containerRegistry: 'demosd5184s.azurecr.io'
+    username: '$(dockerUsername)'
+    password: '$(dockerRegistryPassword)'
 
-      
+- task: Docker@2
+  inputs:
+    command: push
+    repository: 'demosd5184s.azurecr.io/frontend'
+    tags: |
+      $(tag)
+
+- task: Docker@2
+  inputs:
+    command: push
+    repository: 'demosd5184s.azurecr.io/backend'
+    tags: |
+      $(tag)
