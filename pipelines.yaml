@@ -5,12 +5,17 @@ pool:
   name: 'Azure Pipelines'
 
 variables:
-  tag: '$(Build.BuildId)'
-  group: sd5184
+- group: sd5184
+- name: tag
+  value: '$(Build.BuildId)'
+
 steps:
   - checkout: self
     displayName: 'Checkout GitHub Repository'
     # Build Frontend Docker Image
+
+  - script: docker login -u sd5184 -p '$(dockerRegistryPassword)' demosd5184s.azurecr.io
+
   - task: Docker@2
     inputs:
       command: build
@@ -48,5 +53,4 @@ steps:
       severities: 'HIGH, CRITICAL'
       publish: true
 
-  - script: |
-      docker login -u sd5184 -p '$(dockerRegistryPassword)' demosd5184s.azurecr.io
+      
